@@ -1,0 +1,14 @@
+query_image,true_attraction,predicted,rank,top1,top3
+data/images/aberdeen_falls/03.jpg,Aberdeen Falls,Aberdeen Falls,1,1,1
+data/images/bakers_falls/03.jpg,Baker's Falls,Diyaluma Falls,,0,0
+data/images/bambarakanda_falls/03.jpg,Bambarakanda Falls,Dunhinda Falls,2,0,1
+data/images/bopath_ella/03.jpg,Bopath Ella,Bopath Ella,1,1,1
+data/images/devon_falls/03.jpg,Devon Falls,Devon Falls,1,1,1
+data/images/diyaluma_falls/03.jpg,Diyaluma Falls,Diyaluma Falls,1,1,1
+data/images/dunhinda_falls/03.jpg,Dunhinda Falls,Dunhinda Falls,1,1,1
+data/images/galboda_ella/03.jpg,Galboda Ella,Galboda Ella,1,1,1
+data/images/laxapana_falls/03.jpg,Laxapana Falls,Laxapana Falls,1,1,1
+data/images/ramboda_falls/03.jpg,Ramboda Falls,Diyaluma Falls,,0,0
+data/images/ravana_falls/03.jpg,Ravana Falls,Aberdeen Falls,,0,0
+data/images/sera_ella/03.jpg,Sera Ella,Sera Ella,1,1,1
+data/images/st_clairs_falls/03.jpg,St. Clair's Falls,Devon Falls,,0,0

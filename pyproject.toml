@@ -1,0 +1,23 @@
+[project]
+name = "srilanka-tourism-rag"
+version = "0.1.0"
+description = "Multimodal RAG system for the Sri Lanka tourism sector (SCS 4203 Assignment 2)"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    "psycopg[binary]>=3.2",
+    "chromadb>=0.5.20",
+    "sentence-transformers>=3.3",
+    "torch>=2.5",
+    "pillow>=11.0",
+    "google-genai>=0.8",
+    "requests>=2.32",
+    "streamlit>=1.40",
+    "pandas>=2.2",
+    "python-dotenv>=1.0",
+    "torchvision>=0.28.0",
+]
+
+[tool.uv]
+package = false

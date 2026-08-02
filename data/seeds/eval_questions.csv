@@ -1,0 +1,37 @@
+id,question,expected_type,expected_attractions
+Q01,Which waterfalls are more than 100 metres tall?,structured,Bambarakanda Falls|Diyaluma Falls|Kurundu Oya Falls|Laxapana Falls|Ramboda Falls
+Q02,How many UNESCO World Heritage sites are in the knowledge base?,structured,Sigiriya|Galle Fort|Sacred City of Anuradhapura|Ancient City of Polonnaruwa|Dambulla Cave Temple|Temple of the Tooth
+Q03,List the beaches in the Eastern Province,structured,Arugam Bay|Nilaveli|Uppuveli|Kalkudah
+Q04,Which attractions require you to cover your shoulders and knees?,structured,Temple of the Tooth|Dambulla Cave Temple|Mihintale
+Q05,Which waterfalls have a hard trekking difficulty?,structured,Diyaluma Falls|Kurundu Oya Falls
+Q06,Which attractions are in the Nuwara Eliya district?,structured,Kurundu Oya Falls|Laxapana Falls|Ramboda Falls|Aberdeen Falls|Devon Falls|St. Clair's Falls|Baker's Falls
+Q07,What is the tallest waterfall in the knowledge base?,structured,Bambarakanda Falls
+Q08,Which heritage sites are in the Southern Province?,structured,Galle Fort
+Q09,Tell me about the ancient rock fortress with frescoes painted on its wall,semantic,Sigiriya
+Q10,Which place has water gardens and a moat at the base of a huge rock?,semantic,Sigiriya
+Q11,Where can I see Dutch colonial ramparts right on the coast?,semantic,Galle Fort
+Q12,Where did the monk Mahinda meet the king and bring Buddhism to the island?,semantic,Mihintale
+Q13,Which temple has carvings of lovers and an elephant pond?,semantic,Isurumuniya
+Q14,Which stupa enshrines two quarts of the Buddha's relics?,semantic,Ruwanwelisaya
+Q15,Which stone temple is considered the geographical centre of Sri Lanka?,semantic,Nalanda Gedige
+Q16,Which temple houses a tooth relic inside a former royal palace complex?,semantic,Temple of the Tooth
+Q17,Which waterfall is known for the thunderous roar as water crashes onto rock at its base?,semantic,Baker's Falls
+Q18,Where did the Portuguese build a fort at a river mouth to mark the southern edge of their territory?,semantic,Bentota
+Q19,Which coastal town's name means sandy village?,semantic,Weligama
+Q20,Which city is nicknamed Little Rome?,semantic,Negombo
+Q21,Which peninsula is made up of fourteen islands?,semantic,Kalpitiya
+Q22,Which beach suburb of Galle is known for its corals?,semantic,Unawatuna
+Q23,Which citadel was built around a huge granite rock and briefly served as a medieval capital?,semantic,Yapahuwa
+Q24,Which waterfall was reduced by a dam built under the Laxapana hydro project?,semantic,Aberdeen Falls
+Q25,I want a tall waterfall in Badulla district and I need to know how hard the hike is,hybrid,Bambarakanda Falls|Diyaluma Falls
+Q26,Show me a UNESCO heritage site in the Central Province and tell me what to wear,hybrid,Sigiriya|Dambulla Cave Temple|Temple of the Tooth
+Q27,Which waterfalls in Nuwara Eliya have an easy trek and what do they look like?,hybrid,Ramboda Falls|Devon Falls|St. Clair's Falls
+Q28,Which east coast beach is best between May and September and what can I do there?,hybrid,Arugam Bay|Nilaveli|Uppuveli|Kalkudah
+Q29,Which heritage sites are in Anuradhapura district and why do they matter?,hybrid,Mihintale|Ruwanwelisaya|Jetavanaramaya|Isurumuniya|Sacred City of Anuradhapura
+Q30,Which waterfalls are over 200 metres tall and how do I get to them?,hybrid,Bambarakanda Falls|Diyaluma Falls|Kurundu Oya Falls
+Q31,Show me photographs of a tall narrow waterfall dropping down a cliff,image,Bambarakanda Falls|Diyaluma Falls|Kurundu Oya Falls|Laxapana Falls
+Q32,Show me pictures of an ancient rock fortress rising above the jungle,image,Sigiriya
+Q33,Show me photographs of a large white dome-shaped stupa,image,Ruwanwelisaya|Jetavanaramaya
+Q34,Show me pictures of ramparts and colonial buildings beside the sea,image,Galle Fort
+Q35,Show me photographs of a palm-fringed sandy beach,image,Unawatuna|Mirissa|Bentota|Hikkaduwa|Tangalle|Ahungalla|Beruwala|Nilaveli|Uppuveli|Kalkudah|Arugam Bay|Weligama|Negombo|Kalpitiya
+Q36,Show me pictures of a broad waterfall spreading out over a rock face,image,Bopath Ella|Sera Ella|Galboda Ella

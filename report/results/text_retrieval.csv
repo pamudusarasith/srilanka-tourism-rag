@@ -1,0 +1,23 @@
+id,question,rank,recall@1,recall@3,recall@5,reciprocal_rank,top_hit
+Q09,Tell me about the ancient rock fortress with frescoes painted on its wall,1,1,1,1,1.0,Sigiriya
+Q10,Which place has water gardens and a moat at the base of a huge rock?,1,1,1,1,1.0,Sigiriya
+Q11,Where can I see Dutch colonial ramparts right on the coast?,2,0,1,1,0.5,Tangalle
+Q12,Where did the monk Mahinda meet the king and bring Buddhism to the island?,1,1,1,1,1.0,Mihintale
+Q13,Which temple has carvings of lovers and an elephant pond?,1,1,1,1,1.0,Isurumuniya
+Q14,Which stupa enshrines two quarts of the Buddha's relics?,2,0,1,1,0.5,Jetavanaramaya
+Q15,Which stone temple is considered the geographical centre of Sri Lanka?,1,1,1,1,1.0,Nalanda Gedige
+Q16,Which temple houses a tooth relic inside a former royal palace complex?,1,1,1,1,1.0,Temple of the Tooth
+Q17,Which waterfall is known for the thunderous roar as water crashes onto rock at its base?,1,1,1,1,1.0,Baker's Falls
+Q18,Where did the Portuguese build a fort at a river mouth to mark the southern edge of their territory?,1,1,1,1,1.0,Bentota
+Q19,Which coastal town's name means sandy village?,4,0,0,1,0.25,Tangalle
+Q20,Which city is nicknamed Little Rome?,1,1,1,1,1.0,Negombo
+Q21,Which peninsula is made up of fourteen islands?,1,1,1,1,1.0,Kalpitiya
+Q22,Which beach suburb of Galle is known for its corals?,1,1,1,1,1.0,Unawatuna
+Q23,Which citadel was built around a huge granite rock and briefly served as a medieval capital?,2,0,1,1,0.5,Sigiriya
+Q24,Which waterfall was reduced by a dam built under the Laxapana hydro project?,,0,0,0,0.0,Laxapana Falls
+Q25,I want a tall waterfall in Badulla district and I need to know how hard the hike is,1,1,1,1,1.0,Bambarakanda Falls
+Q26,Show me a UNESCO heritage site in the Central Province and tell me what to wear,1,1,1,1,1.0,Sigiriya
+Q27,Which waterfalls in Nuwara Eliya have an easy trek and what do they look like?,3,0,1,1,0.3333,Baker's Falls
+Q28,Which east coast beach is best between May and September and what can I do there?,3,0,1,1,0.3333,Mirissa
+Q29,Which heritage sites are in Anuradhapura district and why do they matter?,1,1,1,1,1.0,Sacred City of Anuradhapura
+Q30,Which waterfalls are over 200 metres tall and how do I get to them?,1,1,1,1,1.0,Bambarakanda Falls

@@ -1,0 +1,9 @@
+metric,value
+router accuracy,69.4%
+text Recall@3,90.9%
+text MRR,0.792
+image top-1,61.5%
+image top-3,69.2%
+context recall (structured),38.9%
+context recall (semantic),91.7%
+context recall (hybrid),97.2%

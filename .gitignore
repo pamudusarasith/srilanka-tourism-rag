@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/images/
+data/chroma/
+data/raw/
+report/.build/
+report/__pycache__/
+.DS_Store

@@ -1,0 +1,37 @@
+id,question,expected_type,structured,semantic,hybrid
+Q01,Which waterfalls are more than 100 metres tall?,structured,1,1,1
+Q02,How many UNESCO World Heritage sites are in the knowledge base?,structured,0,1,1
+Q03,List the beaches in the Eastern Province,structured,1,1,1
+Q04,Which attractions require you to cover your shoulders and knees?,structured,0,0,1
+Q05,Which waterfalls have a hard trekking difficulty?,structured,1,0,1
+Q06,Which attractions are in the Nuwara Eliya district?,structured,1,1,1
+Q07,What is the tallest waterfall in the knowledge base?,structured,1,1,1
+Q08,Which heritage sites are in the Southern Province?,structured,1,1,1
+Q09,Tell me about the ancient rock fortress with frescoes painted on its wall,semantic,0,1,1
+Q10,Which place has water gardens and a moat at the base of a huge rock?,semantic,0,1,1
+Q11,Where can I see Dutch colonial ramparts right on the coast?,semantic,0,1,1
+Q12,Where did the monk Mahinda meet the king and bring Buddhism to the island?,semantic,0,1,1
+Q13,Which temple has carvings of lovers and an elephant pond?,semantic,0,1,1
+Q14,Which stupa enshrines two quarts of the Buddha's relics?,semantic,0,1,1
+Q15,Which stone temple is considered the geographical centre of Sri Lanka?,semantic,1,1,1
+Q16,Which temple houses a tooth relic inside a former royal palace complex?,semantic,0,1,1
+Q17,Which waterfall is known for the thunderous roar as water crashes onto rock at its base?,semantic,0,1,1
+Q18,Where did the Portuguese build a fort at a river mouth to mark the southern edge of their territory?,semantic,0,1,1
+Q19,Which coastal town's name means sandy village?,semantic,0,1,1
+Q20,Which city is nicknamed Little Rome?,semantic,0,1,1
+Q21,Which peninsula is made up of fourteen islands?,semantic,0,1,1
+Q22,Which beach suburb of Galle is known for its corals?,semantic,1,1,1
+Q23,Which citadel was built around a huge granite rock and briefly served as a medieval capital?,semantic,0,1,1
+Q24,Which waterfall was reduced by a dam built under the Laxapana hydro project?,semantic,0,0,0
+Q25,I want a tall waterfall in Badulla district and I need to know how hard the hike is,hybrid,1,1,1
+Q26,Show me a UNESCO heritage site in the Central Province and tell me what to wear,hybrid,1,1,1
+Q27,Which waterfalls in Nuwara Eliya have an easy trek and what do they look like?,hybrid,1,1,1
+Q28,Which east coast beach is best between May and September and what can I do there?,hybrid,1,1,1
+Q29,Which heritage sites are in Anuradhapura district and why do they matter?,hybrid,1,1,1
+Q30,Which waterfalls are over 200 metres tall and how do I get to them?,hybrid,1,1,1
+Q31,Show me photographs of a tall narrow waterfall dropping down a cliff,image,0,1,1
+Q32,Show me pictures of an ancient rock fortress rising above the jungle,image,0,1,1
+Q33,Show me photographs of a large white dome-shaped stupa,image,0,1,1
+Q34,Show me pictures of ramparts and colonial buildings beside the sea,image,0,1,1
+Q35,Show me photographs of a palm-fringed sandy beach,image,0,1,1
+Q36,Show me pictures of a broad waterfall spreading out over a rock face,image,0,1,1
