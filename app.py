@@ -25,7 +25,7 @@ EXAMPLES = {
     "Structured": "Which waterfalls are more than 100 metres tall?",
     "Semantic": "Where can I see colonial era architecture right by the sea?",
     "Image": "Show me photographs of a wide waterfall falling over a rock face",
-    "Hybrid": "I want a tall waterfall in Badulla district — how hard is the hike?",
+    "Hybrid": "I want a tall waterfall in Badulla district, how hard is the hike?",
     "Out of scope": "What is the wifi password at the UCSC?",
 }
 
