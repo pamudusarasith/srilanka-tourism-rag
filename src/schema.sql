@@ -16,16 +16,11 @@ CREATE TABLE attractions (
     trekking_difficulty TEXT CHECK (trekking_difficulty IN
                         ('easy', 'moderate', 'hard') OR trekking_difficulty IS NULL),
 
-    swimming_safety     TEXT,
-    surf_season         TEXT,
-
     era                 TEXT,
     unesco_status       BOOLEAN DEFAULT FALSE,
     dress_code          TEXT,
 
-    entrance_fee_lkr    INTEGER,
     best_season         TEXT,
-    accessibility       TEXT,
     summary             TEXT,
     wiki_url            TEXT
 );
@@ -33,7 +28,6 @@ CREATE TABLE attractions (
 CREATE INDEX idx_attractions_category ON attractions (category);
 CREATE INDEX idx_attractions_district ON attractions (district);
 CREATE INDEX idx_attractions_height   ON attractions (height_m);
-CREATE INDEX idx_attractions_fee      ON attractions (entrance_fee_lkr);
 
 CREATE TABLE images (
     id            SERIAL PRIMARY KEY,

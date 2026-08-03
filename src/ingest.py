@@ -62,10 +62,10 @@ def insert_attraction(cur, row: dict, wiki: dict) -> int:
         """
         INSERT INTO attractions
             (name, category, district, province, latitude, longitude,
-             height_m, trekking_difficulty, swimming_safety, surf_season,
-             era, unesco_status, dress_code, entrance_fee_lkr,
-             best_season, accessibility, summary, wiki_url)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+             height_m, trekking_difficulty,
+             era, unesco_status, dress_code,
+             best_season, summary, wiki_url)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         RETURNING id
         """,
         (
@@ -77,14 +77,10 @@ def insert_attraction(cur, row: dict, wiki: dict) -> int:
             wiki["lon"],
             to_num(row["height_m"]),
             blank_to_none(row["trekking_difficulty"]),
-            blank_to_none(row["swimming_safety"]),
-            blank_to_none(row["surf_season"]),
             blank_to_none(row["era"]),
             to_bool(row["unesco_status"]),
             blank_to_none(row["dress_code"]),
-            to_int(row["entrance_fee_lkr"]),
             blank_to_none(row["best_season"]),
-            blank_to_none(row["accessibility"]),
             wiki["text"].split("\n")[0][:1500],
             wiki["url"],
         ),

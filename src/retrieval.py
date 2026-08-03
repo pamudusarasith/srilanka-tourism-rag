@@ -56,8 +56,7 @@ The system has three retrievers:
   - SQL over a table of attractions with these columns:
     name, category ('waterfall' | 'beach' | 'heritage'), district, province,
     latitude, longitude, height_m, trekking_difficulty ('easy'|'moderate'|'hard'),
-    swimming_safety, surf_season, era, unesco_status (boolean), dress_code,
-    entrance_fee_lkr, best_season, accessibility, summary
+    era, unesco_status (boolean), dress_code, best_season, summary
   - semantic search over descriptive paragraphs about each attraction
   - image similarity search over photographs of each attraction
 
@@ -140,14 +139,10 @@ Table: attractions
   longitude           double precision
   height_m            numeric   -- waterfalls only, else NULL
   trekking_difficulty text      -- 'easy' | 'moderate' | 'hard', waterfalls only
-  swimming_safety     text      -- beaches only
-  surf_season         text      -- beaches only
   era                 text      -- heritage only
   unesco_status       boolean
   dress_code          text      -- heritage only
-  entrance_fee_lkr    integer   -- may be NULL where not recorded
   best_season         text
-  accessibility       text
   summary             text
 
 Rules:
@@ -305,8 +300,6 @@ def retrieve_text(plan: dict, k: int = config.TOP_K_TEXT) -> list[dict]:
 
     where = _metadata_filter(plan)
     res = coll.query(query_embeddings=vec, n_results=k, where=where)
-
-    # A filter that matches nothing falls back to unfiltered search.
     if where and not res["ids"][0]:
         res = coll.query(query_embeddings=vec, n_results=k)
 

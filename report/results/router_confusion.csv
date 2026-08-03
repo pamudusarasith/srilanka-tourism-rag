@@ -1,8 +1,8 @@
 expected,predicted,count
 hybrid,hybrid,4
 hybrid,structured,2
-image,hybrid,1
-image,image,5
-semantic,hybrid,1
-semantic,semantic,15
-structured,structured,8
+image,image,6
+semantic,hybrid,2
+semantic,semantic,14
+structured,hybrid,1
+structured,structured,7

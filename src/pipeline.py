@@ -12,13 +12,19 @@ import retrieval
 
 
 def answer(
-    question: str, image: Image.Image | None = None, force_type: str | None = None
+    question: str,
+    image: Image.Image | None = None,
+    force_type: str | None = None,
+    skip_generation: bool = False,
 ) -> dict:
     """
     Run the full pipeline.
 
     `force_type` skips the router. The evaluation uses it to measure each
-    retriever on its own.
+    retriever on its own. `skip_generation` stops after context integration:
+    the ablation only scores which attractions made it into context, so the
+    final answer-writing call would otherwise run 108 times and be discarded
+    unread.
     """
     if force_type:
         plan = {
@@ -39,6 +45,19 @@ def answer(
     sql_result, text_hits, image_hits, merged_ids = integrate(
         sql_result, text_hits, image_hits
     )
+
+    if skip_generation:
+        return {
+            "question": question,
+            "plan": plan,
+            "sql": sql_result,
+            "text_hits": text_hits,
+            "image_hits": image_hits,
+            "attraction_ids": merged_ids,
+            "answer": "",
+            "context": "",
+            "error": None,
+        }
 
     pil_images = []
     for hit in image_hits[: config.MAX_IMAGES_TO_LLM]:

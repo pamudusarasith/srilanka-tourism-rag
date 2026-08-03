@@ -25,8 +25,8 @@ expect.
 6. Have `report/results/summary.csv` open in a second tab for the closing shot.
 
 Avoid asking about entrance fees, swimming safety, surf season or accessibility.
-Those four columns are NULL for every row, so the system correctly answers that
-it does not know. That is honest behaviour but it is not what you want on camera.
+None of these are tracked, so the system correctly answers that it does not
+know. That is honest behaviour but it is not what you want on camera.
 
 ---
 

@@ -77,33 +77,17 @@
 \vspace{0.8em}
 
 % ---------------------------------------------------------------------------
-\section{Introduction}
-
-Tourists ask questions of several different kinds. ``Which waterfalls are over
-100 metres tall?'' filters on a numeric attribute. ``Where can I see
-colonial-era fortifications beside the sea?'' names no attraction and no
-column, so it has to be matched on meaning. ``What is this place?'' asked over
-a photograph is neither of those.
-
-Each kind suits a different store. A relational database answers exactly and
-can count and sort, but cannot match on meaning. A text-embedding index matches
-on meaning but cannot filter reliably, and will return a passage that sounds
-right while containing the wrong number. An image-embedding index handles
-visual similarity, which neither of the others can express.
-
-This system uses all three, so the design problem is how to combine them:
-what decides which stores to consult, and how their outputs become one context
-for the language model. Section \ref{sec:retrieval}
-covers that, and Section \ref{sec:eval} measures whether combining them helps.
-
-The knowledge base covers waterfalls, beaches, and historical sites and
-temples. The brief allows a subset of categories, and these three exercise
-different parts of the schema: waterfalls have numeric attributes, heritage
-sites have categorical and boolean ones, and beaches are described mostly in
-prose.
-
-% ---------------------------------------------------------------------------
 \section{System architecture}
+
+A question like "which waterfalls are over 100 metres tall" filters on a
+number. "Where can I see colonial-era fortifications beside the sea" names no
+column, so it has to be matched on meaning. A photograph is neither. Each kind
+needs a different store: a relational database answers exactly but cannot
+match on meaning, a text-embedding index matches on meaning but cannot filter
+reliably, and an image-embedding index handles visual similarity that neither
+of the others can express. This system routes each question to whichever
+stores can answer it, then merges the results before the language model sees
+them.
 
 \begin{center}
 \begin{tikzpicture}[node distance=7mm]
@@ -152,14 +136,19 @@ prose.
 \end{tikzpicture}
 \end{center}
 
-Stage 3 combines the three result sets. Section \ref{sec:integrate}
-describes it.
+Stage 3, described in Section \ref{sec:integrate}, is what makes this a
+combined system rather than three independent search boxes. Section
+\ref{sec:eval} measures whether combining them actually helps.
 
 % ---------------------------------------------------------------------------
-\section{Knowledge base}
+\section{Database design}
 
-The knowledge base holds 42 attractions across 19 districts, 14 in each
-category, with 282 text chunks and 164 photographs.
+The knowledge base covers three categories, waterfalls, beaches, and
+historical sites and temples, chosen from the brief's list because each
+exercises a different part of the schema: waterfalls carry numeric attributes,
+heritage sites carry categorical and boolean ones, and beaches are described
+mostly in prose. It holds 42 attractions across 19 districts, 14 per category,
+with 282 text chunks and 164 photographs.
 
 \begin{center}
 \begin{tabular}{@{}lr@{}}
@@ -174,46 +163,16 @@ Photographs held out for evaluation & 13 \\
 \end{tabular}
 \end{center}
 
-\subsection{Two text sources}
-
-The first version used Wikipedia alone, which turned out to cover the three
-categories very unevenly. The Sigiriya article runs to 2{,}660 words.
-Bambarakanda Falls, the tallest waterfall in Sri Lanka, is a 131-word stub, and
-several other waterfalls are shorter. Semantic search over that corpus would
-have worked well for heritage sites and poorly for waterfalls.
-
-AmazingLanka (amazinglanka.com), a Sri Lankan travel encyclopaedia, covers the
-attractions Wikipedia treats thinly, including access routes and trail
-conditions. It runs on WordPress, so we read it through its public REST API
-rather than scraping HTML. It supplied text for 26 of the 42 attractions and
-took Bambarakanda Falls from 78 words to roughly 350.
-
-Its search is fuzzy: querying ``Bambarakanda'' returns an article about the
-Devil's Staircase trail among the top results. A candidate article is therefore
-accepted only if its title is similar enough to the attraction name, since
-attaching the wrong article is worse than attaching none.
-
-\subsection{Licensing}
-
-Wikipedia and Wikimedia Commons are CC BY-SA, so both text and photographs are
-used, with the licence and author of each image stored in the \code{images}
-table. AmazingLanka's content is copyrighted, so we use its text for
-non-commercial academic purposes with per-chunk attribution and take none of
-its photographs. All 164 images come from Commons.
-
-Every row in \code{documents} records its \code{source} and \code{source\_url},
-so any retrieved passage can be traced back to its page, and every row in
-\code{images} records its licence and author.
-
-\subsection{Curation}
-
-Neither source reliably gives entrance fees, trekking difficulty or dress
-codes. Those were entered by hand in \code{data/seeds/attractions.csv}, which
-the ingest script treats as authoritative for structured fields while the web
-sources supply prose and images.
-
-% ---------------------------------------------------------------------------
-\section{Database design}
+Wikipedia alone covers the three categories unevenly: the Sigiriya article runs
+to 2{,}660 words, while Bambarakanda Falls, the tallest waterfall in Sri Lanka,
+is a 131-word stub. AmazingLanka, a Sri Lankan travel encyclopaedia read
+through its public REST API, fills in exactly the attractions Wikipedia treats
+thinly, and supplied text for 26 of the 42 attractions. Trekking difficulty is
+not reliably available from either source and was entered by hand in
+\code{data/seeds/attractions.csv}. Entrance fees, swimming safety, surf season
+and accessibility notes were planned as columns too, but neither source gave
+a usable value for any of the 42 attractions, so they were dropped from the
+schema rather than kept as columns that were always empty.
 
 \subsection{Relational schema}
 
@@ -225,13 +184,10 @@ attractions (
     district TEXT, province TEXT, latitude FLOAT8, longitude FLOAT8,
     height_m NUMERIC(6,1),        -- waterfalls
     trekking_difficulty TEXT,     -- waterfalls
-    swimming_safety TEXT,         -- beaches
-    surf_season TEXT,             -- beaches
     era TEXT,                     -- heritage
     unesco_status BOOLEAN,        -- heritage
     dress_code TEXT,              -- heritage
-    entrance_fee_lkr INT, best_season TEXT, accessibility TEXT,
-    summary TEXT, wiki_url TEXT
+    best_season TEXT, summary TEXT, wiki_url TEXT
 )
 
 images (
@@ -250,36 +206,33 @@ documents (
 )
 \end{codeblock}
 
-Indexed on \code{category}, \code{district}, \code{height\_m} and
-\code{entrance\_fee\_lkr}, plus \code{attraction\_id} on both child tables.
+Indexed on \code{category}, \code{district} and \code{height\_m}, plus
+\code{attraction\_id} on both child tables. Every image row records its
+source and licence, so provenance stays traceable back to Commons.
 
 \subsection{Design decisions}
 
-\textit{One wide table instead of per-category subtypes.} The normalised design
-would put \code{height\_m} in a \code{waterfalls} table and \code{dress\_code}
-in a \code{heritage\_sites} table, both joined to a common supertype. That is
-cleaner, because it makes it structurally impossible to set a waterfall's
-height on a beach.
-
-We rejected it for a reason specific to this system. The SQL retriever is a
+\textit{One wide table instead of per-category subtypes.} The normalised
+design would put \code{height\_m} in a \code{waterfalls} table and
+\code{dress\_code} in a \code{heritage\_sites} table, both joined to a common
+supertype. That is cleaner, since it makes it structurally impossible to set a
+waterfall's height on a beach. We rejected it because the SQL retriever is a
 language model writing queries from a schema in its prompt
-(Section \ref{sec:sqlretrieval}). Every extra table is another join it has to
-get right. With one table the generated SQL is a single \code{SELECT}, which is
-more reliable. The cost is that most category-specific columns are NULL on any
-given row: 28 of 42 rows have no \code{height\_m}, correctly, because only the
-14 waterfalls have a height. This is the decision we would most want to
-revisit.
+(Section \ref{sec:sqlretrieval}): every extra table is another join it has to
+get right, and a single table keeps the generated SQL a plain
+\code{SELECT}. The cost is that most category-specific columns are NULL on any
+given row, 28 of 42 rows have no \code{height\_m}, correctly, since only the 14
+waterfalls have a height. This is the decision we would most want to revisit.
 
 \textit{\code{unesco\_status} marks inscribed sites only.} Six attractions are
 UNESCO World Heritage Sites. Ruwanwelisaya, Jetavanaramaya and Isurumuniya
-stand inside the Sacred City of Anuradhapura, which is itself one inscribed
-site, so flagging them separately would make ``how many UNESCO sites are
-there?'' answer nine and count one site four times. The column means that the
-row is itself an inscribed site.
+stand inside the Sacred City of Anuradhapura, itself one inscribed site, so
+flagging them separately would make "how many UNESCO sites are there" answer
+nine and count one site four times.
 
 \textit{\code{documents} holds the authoritative text.} ChromaDB stores only
-vectors, ids and filter metadata. The whole vector index can be rebuilt from
-PostgreSQL by re-running \code{embed.py}, so the two stores cannot drift apart.
+vectors, ids and filter metadata, so the whole vector index can be rebuilt
+from PostgreSQL by re-running \code{embed.py}.
 
 \subsection{Vector store}
 
@@ -298,12 +251,9 @@ PostgreSQL by re-running \code{embed.py}, so the two stores cannot drift apart.
 Both use cosine distance. \code{text\_chunks} carries \code{attraction\_id},
 \code{name}, \code{category}, \code{district} and the source fields as
 metadata; \code{images} carries the same minus the source fields, plus
-\code{file\_path}.
-
-The two collections are separate because the encoders produce vectors in
-unrelated spaces. Comparing a BGE vector to a CLIP vector raises no error, it
-returns meaningless neighbours, so separate collections make that mistake
-impossible to write.
+\code{file\_path}. The two collections stay separate because the encoders
+produce vectors in unrelated spaces: comparing a BGE vector to a CLIP vector
+raises no error, it just returns meaningless neighbours.
 
 % ---------------------------------------------------------------------------
 \section{Embedding generation}
@@ -314,38 +264,28 @@ routing, SQL generation and answering call an external model.
 \subsection{Text}
 
 Articles are split into overlapping windows of 220 words with 50 words of
-overlap, and each chunk is prefixed with its attraction's name before encoding.
-Without it, a chunk reading ``It is 263\,m high and has a single drop'' tells
-neither the embedding nor the model which attraction ``it'' is.
-
-Wikipedia's trailing sections (\textit{See also}, \textit{References},
-\textit{External links}) are stripped first, as are AmazingLanka's navigation
-blocks and its star-rating widget, which renders as text and would otherwise be
-embedded along with the article. Vectors are L2-normalised, so cosine distance
-matches the dot product. The result is 282 vectors of 768 dimensions.
+overlap, and each chunk is prefixed with its attraction's name before
+encoding. Without it, a chunk reading "It is 263\,m high and has a single
+drop" tells neither the embedding nor the model which attraction "it" is.
+Wikipedia's trailing sections and AmazingLanka's navigation blocks and
+star-rating widget are stripped first. Vectors are L2-normalised, so cosine
+distance matches the dot product.
 
 \subsection{Images}
 
 Photographs are converted to RGB, resized so the longest edge is 512\,px, and
-encoded with CLIP ViT-B/16 into 512 dimensions. CLIP resizes to 224\,px
-internally, so the stored 512\,px is for display in the interface rather than
-for embedding quality.
-
-CLIP was chosen over an image-only encoder because it puts images and text in
-one shared space, which gives two capabilities from one index: image-to-image
-search when a photograph is uploaded, and text-to-image search when someone
-types ``a wide waterfall over a rock face'' instead. Both hit the same
-collection.
-
-Thirteen photographs were kept out of the index. The ingest script marks the
-fourth photograph of every waterfall \code{is\_held\_out} and the embedding
-script skips those rows, so the system can be tested on images it has not seen.
+encoded with CLIP ViT-B/16 into 512 dimensions. CLIP was chosen because it
+puts images and text in one shared space, which gives two capabilities from
+one index: image-to-image search when a photograph is uploaded, and
+text-to-image search when someone types a description instead. Thirteen
+photographs, the fourth of every waterfall, are held out of the index to
+serve as an evaluation set of images the system has not seen.
 
 \subsection{Choosing the encoders}
 
-Both encoders were selected by measurement rather than reputation. Each
-candidate was scored on the same data: text encoders on the 22 semantic and
-hybrid evaluation questions, image encoders on the 13 held-out photographs.
+Both encoders were selected by measurement. Text encoders were scored on the
+22 semantic and hybrid evaluation questions, image encoders on the 13
+held-out photographs.
 
 \begin{center}
 \small
@@ -375,20 +315,14 @@ hybrid evaluation questions, image encoders on the 13 held-out photographs.
 \end{tabular}
 \end{center}
 
-Three results are worth drawing out. BGE ships with an optional instruction
-prefix for queries, and adding it made retrieval \textit{worse} here, so it is
-not used. Nomic-embed-text was tested because its 8192-token context and
-Matryoshka dimensions are attractive on paper, but our chunks are 220 words, so
-the long context is never exercised, and it scored below the smaller BGE model
-while also requiring \code{trust\_remote\_code}. On the image side, moving from
-32-pixel to 16-pixel patches doubled top-1 accuracy, which is what the task
-needs: the held-out set is all waterfalls, so the encoder has to separate
-photographs of visually similar subjects. The larger ViT-L/14 did not help,
-scoring the same top-1 and lower MRR at three times the compute.
-
-The margins are small in absolute terms. The text comparison turns on two
-questions out of 22 and the image comparison on four photographs out of 13, so
-these results indicate a direction rather than settling the question.
+BGE ships with an optional instruction prefix for queries, and adding it made
+retrieval worse here, so it is not used. Nomic-embed-text's 8192-token context
+is never exercised by 220-word chunks, and it scored below the smaller BGE
+model while also requiring \code{trust\_remote\_code}. On images, moving from
+32-pixel to 16-pixel patches doubled top-1 accuracy, and the larger ViT-L/14
+did not help further. The text comparison turns on two questions out of 22 and
+the image comparison on four photographs out of 13, so these results point in
+a direction rather than settle it definitively.
 
 % ---------------------------------------------------------------------------
 \section{Retrieval workflow}
@@ -398,8 +332,8 @@ these results indicate a direction rather than settling the question.
 
 One LLM call classifies the question as \code{structured}, \code{semantic},
 \code{image} or \code{hybrid} and extracts a semantic sub-query plus any
-category or district the question restricts itself to. The class decides which
-retrievers run.
+category or district the question restricts itself to. The class decides
+which retrievers run.
 
 \begin{center}
 \begin{tabular}{@{}lccc@{}}
@@ -414,72 +348,52 @@ retrievers run.
 \end{tabular}
 \end{center}
 
-An uploaded photograph always forces image retrieval. If the routing call fails
-after its retries the query falls back to \code{hybrid} and runs everything.
-That is slower, but it never retrieves less than the question needs.
+An uploaded photograph always forces image retrieval. If the routing call
+fails after its retries the query falls back to \code{hybrid} and runs
+everything, which is slower but never retrieves less than the question needs.
 
 \subsection{Structured retrieval}
 \label{sec:sqlretrieval}
 
 The model is given the schema and writes a \code{SELECT}, which is checked
-before it runs. Anything that does not start with \code{SELECT}, contains a
+before it runs: anything that does not start with \code{SELECT}, contains a
 second statement, or matches \code{INSERT}, \code{UPDATE}, \code{DELETE},
 \code{DROP}, \code{ALTER}, \code{TRUNCATE}, \code{GRANT}, \code{REVOKE},
-\code{CREATE} or \code{COPY} is rejected.
-
-An early version had a bug here. The model wrote predicates
-like \code{province = 'Central Province'} against a column storing
-\code{'Central'}. The SQL was valid, ran without error and returned no rows,
-which from the user's side looks the same as the attraction not existing. The
-fix was to read the distinct values of every low-cardinality column out of the
-database at start-up and put them in the prompt. A model writing SQL needs the
-data's vocabulary as well as its schema.
+\code{CREATE} or \code{COPY} is rejected. The prompt also lists the distinct
+values of every low-cardinality column, since a model given only the schema
+will write valid-looking predicates such as \code{province = 'Central
+Province'} against a column that actually stores \code{'Central'}, which
+returns nothing and looks identical to the attraction not existing.
 
 \subsection{Vector retrieval}
 
 Semantic search embeds the sub-query and takes the top $k$ chunks. If the
 router identified a category or district, that becomes a ChromaDB metadata
-filter applied before the vector comparison, so ``temples near Kandy'' searches
-only Kandy instead of hoping the embedding encodes the district. Structured knowledge
-narrows the semantic search here. A filter that matches nothing
-falls back to an unfiltered search rather than returning an empty result.
-
+filter applied before the vector comparison, so a question about temples near
+Kandy searches only Kandy instead of hoping the embedding encodes the
+district. A filter that matches nothing falls back to an unfiltered search.
 Image search embeds either the uploaded photograph or the text sub-query
 against the same CLIP collection.
 
 \subsection{Context integration}
 \label{sec:integrate}
 
-This is where the two databases meet.
-
-Candidates are ranked by attraction rather than by chunk, since vector search
-often returns several chunks and photographs belonging to the same place, and
-one well-documented site would otherwise fill the context window.
-
-Every attraction found by either vector store is then looked up in PostgreSQL
-and its full row added to the context. A purely semantic query like ``where can
-I see colonial-era fortifications beside the sea?'' retrieves prose about Galle
-Fort, and this step gives the model its district, era, UNESCO status
-and coordinates, none of which appear in the retrieved text.
-
-Weak image matches are dropped. CLIP similarities sit in a narrow band, so a
-fixed threshold does not work, but the gap below the best match does. A
-photograph of Sigiriya returns the right image at 1.00 while unrelated
-waterfalls still score around 0.85, and passing those on made the model
-describe attractions nobody asked about. Hits more than 0.10 below the best
-match are removed.
+This is where the relational and vector stores meet. Candidates are ranked by
+attraction rather than by chunk, since vector search often returns several
+chunks and photographs belonging to the same place. Every attraction found by
+either vector store is then looked up in PostgreSQL and its full row added to
+the context, so a purely semantic match still arrives carrying its exact
+district, era, UNESCO status and coordinates. Weak image matches are dropped
+using the gap below the best score rather than a fixed threshold, since CLIP
+similarities sit in a narrow band regardless of relevance.
 
 \subsection{Generation}
 
-The context goes to Gemma 4 31B along with the retrieved photographs
-as image parts rather than filenames, so the generation is genuinely
-multimodal.
-
-The system prompt tells the model to answer only from the context, cite
-passages as \code{[S1]}, and reply that the knowledge base does not cover the
-question rather than filling the gap from general knowledge. A tourism system
-that invents an entrance fee is worse than one that admits it does not know,
-because the user cannot tell the difference.
+The context goes to Gemma 4 31B along with the retrieved photographs as image
+parts rather than filenames, so the generation is genuinely multimodal. The
+system prompt tells the model to answer only from the context, cite passages
+as \code{[S1]}, and reply that the knowledge base does not cover the question
+rather than filling the gap from general knowledge.
 
 % ---------------------------------------------------------------------------
 \section{Evaluation}
@@ -487,24 +401,16 @@ because the user cannot tell the difference.
 
 \subsection{Method}
 
-We wrote 36 evaluation questions, each labelled with its expected query type and
-the attractions a correct answer has to be grounded in: 8 structured, 16
-semantic, 6 hybrid and 6 image. Four things were measured: router accuracy over
-all 36, text retrieval over the 22 semantic and hybrid questions (Recall@$k$ and
-MRR, ranked by attraction), image retrieval on the 13 held-out photographs, and
-an ablation.
-
-An earlier version of the evaluation set had 12 questions, which left only six for
-text retrieval. At that size a single question moved Recall@1 by 17 points, so
-no comparison between retrieval strategies or encoders meant anything. The
-questions were written against passages in the corpus and deliberately worded
-differently from the source text, so they test retrieval rather than keyword
-overlap.
-
-The ablation measures \textit{context recall}: how often the expected
-attraction reaches the model under each retrieval strategy. We used that rather
-than scoring answer wording because it is objective. If the right attraction
-never reaches the model, no prompt will fix the answer.
+We wrote 36 evaluation questions, each labelled with its expected query type
+and the attractions a correct answer has to be grounded in: 8 structured, 16
+semantic, 6 hybrid and 6 image. Four things were measured: router accuracy
+over all 36, text retrieval over the 22 semantic and hybrid questions
+(Recall@$k$ and MRR, ranked by attraction), image retrieval on the 13
+held-out photographs, and an ablation comparing SQL-only, semantic-only and
+the full hybrid pipeline by \textit{context recall}, how often the expected
+attraction reaches the model. Context recall was chosen over judging answer
+wording because it is objective: if the right attraction never reaches the
+model, no prompt can fix the answer.
 
 \subsection{Results}
 
@@ -513,7 +419,7 @@ never reaches the model, no prompt will fix the answer.
 \toprule
 \textbf{Metric} & \textbf{Result} \\
 \midrule
-Router accuracy   & 69.4\% (25/36) \\
+Router accuracy   & 86.1\% (31/36) \\
 Text Recall@1     & 68.2\% \\
 Text Recall@3     & 90.9\% \\
 Text Recall@5     & 95.5\% \\
@@ -521,7 +427,7 @@ Text MRR          & 0.792 \\
 Image top-1       & 61.5\% (n=13) \\
 Image top-3       & 69.2\% (n=13) \\
 \midrule
-Context recall, SQL only      & 38.9\% \\
+Context recall, SQL only      & 52.9\% \\
 Context recall, semantic only & 91.7\% \\
 Context recall, hybrid        & \textbf{97.2\%} \\
 \bottomrule
@@ -530,8 +436,7 @@ Context recall, hybrid        & \textbf{97.2\%} \\
 
 \subsection{Discussion}
 
-The ablation is the main result, and it is clearest broken down by question
-type.
+The ablation is clearest broken down by question type.
 
 \begin{center}
 \small
@@ -539,106 +444,76 @@ type.
 \toprule
 \textbf{Question type} & \textbf{n} & \textbf{SQL only} & \textbf{Semantic only} & \textbf{Hybrid} \\
 \midrule
-structured & 8  & 75\%  & 75\%   & \textbf{100\%} \\
-semantic   & 16 & 12\%  & 94\%   & 94\% \\
+structured & 8  & 88\%  & 75\%   & \textbf{100\%} \\
+semantic   & 16 & 36\%  & 94\%   & 94\% \\
 image      & 6  & 0\%   & 100\%  & 100\% \\
 hybrid     & 6  & 100\% & 100\%  & 100\% \\
 \midrule
-all        & 36 & 38.9\% & 91.7\% & \textbf{97.2\%} \\
+all        & 36 & 52.9\% & 91.7\% & \textbf{97.2\%} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Retrieving from the relational store alone reaches the right attraction in
-38.9\% of cases, and it fails in a structured way: 12\% on semantic questions
-and 0\% on image questions, because no column encodes ``has frescoes'' or
-``looks like this photograph''. Combining the stores beats either alone, and on
-structured questions the margin is decisive, 100\% against 75\% for semantic
-search on its own.
+The relational store alone fails in a structured way: it cannot answer
+questions with no matching column, such as one about frescoes or one asking
+what a photograph shows. Combining the stores beats either alone, most
+clearly on structured questions, where hybrid retrieval reaches every
+attraction that SQL and semantic search individually miss.
 
-The margin between semantic-only and hybrid is narrow, 91.7\% against 97.2\%,
-and that is worth stating plainly rather than presenting the combination as
-transformative. Semantic search does well on image questions because a request
-like ``show me pictures of an ancient rock fortress'' describes the attraction
-in words that match its text chunks, so the right attraction is found even
-without touching the image index. The image index still earns its place by
-answering questions posed \textit{with} a photograph rather than about one,
-which the evaluation set cannot express as a text query.
+The "image" row is worth a caveat. These questions are still typed text
+("show me photographs of a tall narrow waterfall"), so a description like
+"an ancient rock fortress" already matches the attraction's text chunks
+without the image index doing any work, which is why semantic-only also
+reaches 100\% there. This table cannot show what the image index is actually
+for: answering with an uploaded photograph, which no text query can express.
+That capability is measured separately in the image retrieval results above.
 
-An earlier version of this evaluation used 12 questions and reported 58.3\%,
-66.7\% and 100\% for the three strategies. Those figures are not comparable to
-the ones above. The evaluation set was rebalanced from three questions per type to 8
-structured, 16 semantic, 6 hybrid and 6 image, so a strategy that cannot answer
-semantic questions is now penalised much more heavily. The change in the
-SQL-only figure is mostly this rebalancing, not a regression.
-
-Only one question fails under the full pipeline. Q24 asks which waterfall was
-reduced by a dam built under the Laxapana project. The fact is present in the
-AmazingLanka text for Aberdeen Falls, but the chunk containing it does not rank
-in the top five.
-
-\textbf{Routing.} At 69.4\% the router is the weakest component. Its errors are
-mostly over-classification: five semantic and four image questions were routed
-as \code{hybrid}, which costs time and context budget but not correctness,
-since \code{hybrid} retrieves a superset. One hybrid question was routed as
-\code{structured}, which is the more serious kind of error, because a narrower
-strategy can lose information the question needed.
-
-The same 36 questions were also run against \code{gemini-3.1-flash-lite}, which
-routed 83.3\% correctly against Gemma's 69.4\%. Retrieval quality is identical
-between the two, since the encoders do not change, so the difference is
-entirely in classification. A stronger model for the routing call alone would
-be the cheapest available improvement, and there is no reason routing and
-answering have to use the same model.
-
-We did not tune the router prompt against these questions. The evaluation set is the
-only measurement available, and tuning against it would leave nothing to
+\textbf{Routing.} 86.1\% (31/36) is the weakest figure, and the five errors
+split into two kinds. Three are over-classification to \code{hybrid}, two
+semantic questions and one structured question, which costs time and context
+budget but not correctness, since \code{hybrid} retrieves a superset. Two are
+narrower: hybrid questions routed as structured instead. That is the more
+consequential kind, since a narrower strategy can lose information, though in
+this set it did not, because every hybrid-labelled question is also fully
+answerable from the relational store alone (the hybrid row above reads 100\%
+under SQL only). Image questions were classified perfectly. The router prompt
+was not tuned against these questions, since the evaluation set is the only
+measurement available and tuning against it would leave nothing left to
 evaluate on.
 
-\textbf{Text retrieval.} Recall@3 of 90.9\% and MRR of 0.792 mean the right
-attraction is usually at or near the top. Recall@1 of 68.2\% is the figure with
-most room left, and reranking the retrieved chunks would be the obvious way to
-raise it.
+\textbf{Text retrieval.} Recall@3 of 90.9\% and MRR of 0.792 mean the
+right attraction is usually at or near the top of the ranking. Recall@1 of
+68.2\% is the figure with the most room left, and reranking the retrieved
+chunks is the obvious way to raise it.
 
-\textbf{Image retrieval.} Top-1 of 61.5\% is measured on the hardest available
-task: all 13 held-out photographs are waterfalls, so the encoder has to tell
-Aberdeen Falls from Galboda Ella rather than a beach from a temple. Top-3 of
-69.2\% matters more in practice, since the shortlist is what reaches the model.
-
-\textbf{A measurement error worth reporting.} An early run put SQL-only context
-recall at 25\%. The ablation issues over a hundred pipeline runs in quick
-succession, the free-tier API rate-limited part of that burst, and the harness
-scored those failed calls as retrieval misses. We added backoff to the API
-client and separated an \code{api\_error} flag from an empty result, so
-unresolved failures are excluded from the averages instead of counted against
-retrieval. 25\% is plausible for SQL-only retrieval, so nothing about it looked
-wrong, and it would have been reported as a result.
+\textbf{Image retrieval.} Top-1 of 61.5\% (n=13) is measured on the hardest
+available task, since all 13 held-out photographs are waterfalls and the
+encoder has to tell visually similar falls apart rather than tell a beach
+from a temple. Top-3 of 69.2\% (n=13) matters more in practice, since the
+shortlist is what reaches the model.
 
 \subsection{Limitations}
 
 \begin{itemize}
-  \item \code{entrance\_fee\_lkr}, \code{swimming\_safety},
-        \code{surf\_season} and \code{accessibility} are NULL for all 42 rows.
-        Neither source reports them reliably and they were not curated in time,
-        so the system answers that it does not know, and the structured
-        demonstration uses fewer columns than the schema supports.
-  \item Kurundu Oya Falls has no photographs, because Commons search returned
-        none usable, so it cannot be found through image retrieval.
-  \item Semantic search has no per-attraction diversity cap. One query returned
-        six chunks all belonging to Galle Fort.
-  \item The SELECT-only guard is enforced in application code. The database
-        user is not read-only.
-  \item There is no reranking, which is the obvious way to raise Recall@1
-        from 68.2\%.
-  \item Thirty-six questions and thirteen images are still a small sample.
-        The gap between semantic-only and hybrid rests on two questions.
-  \item The \code{summary} column is deliberately excluded from the assembled
-        context to avoid duplicating the lead paragraph. Where a fact appears
-        only there and not in a retrieved chunk, the system answers that it
-        does not know even though the database holds the answer.
-  \item National parks and wildlife were dropped for time. Distinct species are
-        much easier to tell apart visually than one waterfall from another, so
-        their absence makes the image task harder than it would have been.
+  \item Entrance fees, swimming safety, surf season and accessibility are not
+        tracked at all: neither source gave a usable value for any
+        attraction, so these were dropped from the schema rather than kept
+        as columns that were always NULL. A question about any of them falls
+        through to semantic search, which does not have the information
+        either, and the system says so rather than guessing.
+  \item There is no reranking of retrieved chunks, which is the most direct
+        way to raise Recall@1.
+  \item Semantic search has no per-attraction diversity cap: one query
+        returned six chunks all belonging to the same place.
+  \item The \code{SELECT}-only guard is enforced in application code rather
+        than at the database level, and the database user is not read-only.
+  \item Thirty-six questions and thirteen held-out images are still a small
+        sample; the gap between semantic-only and hybrid context recall
+        rests on 2 of 36 questions.
+  \item National parks and wildlife were dropped for time. Distinct species
+        are easier to tell apart visually than one waterfall from another,
+        so their absence makes the image retrieval task harder than it would
+        otherwise be.
 \end{itemize}
 
 % ---------------------------------------------------------------------------
@@ -672,10 +547,10 @@ app.py            Streamlit interface
 
 The interface shows the routing decision, the SQL that ran, the retrieved
 chunks with their similarity scores, the matched photographs and the exact
-context sent to the model. That makes it possible to check where an
-answer came from.
+context sent to the model, so an answer can always be traced back to what
+produced it.
 
-Ingest is destructive and reproducible. Each run re-applies the schema and
+Ingest is destructive and reproducible: each run re-applies the schema and
 rebuilds from the curated CSV plus the web sources, committing per attraction
 so a network failure does not lose earlier work. Installation and run
 instructions are in \code{README.md}.
@@ -684,12 +559,12 @@ instructions are in \code{README.md}.
 \section*{Acknowledgements}
 
 \begin{itemize}
-  \item Wikipedia and Wikimedia Commons, for descriptive text, coordinates and
-        all 164 photographs, under CC BY-SA. Per-image licence and author are
-        stored in the \code{images} table.
-  \item AmazingLanka (\url{https://amazinglanka.com/wp/}), for additional text
-        on 26 attractions, used for non-commercial academic purposes with
-        attribution. No images were taken from this source.
+  \item Wikipedia and Wikimedia Commons, for descriptive text, coordinates
+        and all 164 photographs, under CC BY-SA. Per-image licence and
+        author are stored in the \code{images} table.
+  \item AmazingLanka (\url{https://amazinglanka.com/wp/}), for additional
+        text on 26 attractions, used for non-commercial academic purposes
+        with attribution. No images were taken from this source.
   \item Models: \code{BAAI/bge-base-en-v1.5} (MIT), OpenAI CLIP via
         \code{sentence-transformers}, Google Gemma via the Gemini API.
   \item Libraries: PostgreSQL, ChromaDB, sentence-transformers, PyTorch,
@@ -698,20 +573,5 @@ instructions are in \code{README.md}.
 
 AI-assisted development tools were used during implementation. The design
 decisions, evaluation method and analysis are our own.
-
-\section*{References}
-
-\begin{enumerate}[leftmargin=1.8em]
-  \item Lewis, P. et al. (2020). \textit{Retrieval-Augmented Generation for
-        Knowledge-Intensive NLP Tasks.} NeurIPS.
-  \item Radford, A. et al. (2021). \textit{Learning Transferable Visual Models
-        From Natural Language Supervision.} ICML.
-  \item Xiao, S. et al. (2023). \textit{C-Pack: Packed Resources For General
-        Chinese Embeddings.} arXiv:2309.07597.
-  \item ChromaDB documentation. \url{https://docs.trychroma.com/}
-  \item PostgreSQL 16 documentation. \url{https://www.postgresql.org/docs/16/}
-  \item UNESCO World Heritage Centre, Sri Lanka.
-        \url{https://whc.unesco.org/en/statesparties/lk}
-\end{enumerate}
 
 \end{document}

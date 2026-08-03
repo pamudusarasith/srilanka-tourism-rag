@@ -99,5 +99,5 @@ uv run python src/evaluate.py     # evaluation metrics
 - **Text and coordinates** — [Wikipedia](https://en.wikipedia.org/), via the MediaWiki API, CC BY-SA.
 - **Additional descriptive text** — [AmazingLanka](https://amazinglanka.com/wp/), via its WordPress REST API. Used for non-commercial academic purposes; no images are taken from this source.
 - **Photographs** — [Wikimedia Commons](https://commons.wikimedia.org/), CC BY-SA / CC BY. Per-image licence and author are stored in the `images` table.
-- **Structured fields** (entrance fees, trekking difficulty, dress codes) — curated by hand in `data/seeds/attractions.csv`.
+- **Structured fields** (trekking difficulty, dress codes) — curated by hand in `data/seeds/attractions.csv`.
 - **Models** — `BAAI/bge-base-en-v1.5` (text embeddings), `clip-ViT-B-16` (image embeddings), `gemma-4-31b-it` (generation).

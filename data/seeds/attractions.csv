@@ -1,43 +1,43 @@
-wiki_title,name,category,district,province,height_m,trekking_difficulty,swimming_safety,surf_season,era,unesco_status,dress_code,entrance_fee_lkr,best_season,accessibility
-Bambarakanda Falls,Bambarakanda Falls,waterfall,Badulla,Uva,263,moderate,,,,false,,,December-March,
-Diyaluma Falls,Diyaluma Falls,waterfall,Badulla,Uva,220,hard,,,,false,,,May-September,
-Kurundu Oya Falls,Kurundu Oya Falls,waterfall,Nuwara Eliya,Central,206,hard,,,,false,,,December-March,
-Laxapana Falls,Laxapana Falls,waterfall,Nuwara Eliya,Central,126,moderate,,,,false,,,May-September,
-Ramboda Falls,Ramboda Falls,waterfall,Nuwara Eliya,Central,109,easy,,,,false,,,May-September,
-Aberdeen Falls,Aberdeen Falls,waterfall,Nuwara Eliya,Central,98,moderate,,,,false,,,May-September,
-Devon Falls,Devon Falls,waterfall,Nuwara Eliya,Central,97,easy,,,,false,,,May-September,
-St. Clair's Falls,St. Clair's Falls,waterfall,Nuwara Eliya,Central,80,easy,,,,false,,,May-September,
-Dunhinda Falls,Dunhinda Falls,waterfall,Badulla,Uva,64,moderate,,,,false,,,December-March,
-Bopath Ella,Bopath Ella,waterfall,Ratnapura,Sabaragamuwa,30,easy,,,,false,,,May-September,
-Ravana Falls,Ravana Falls,waterfall,Badulla,Uva,25,easy,,,,false,,,December-March,
-Baker's Falls,Baker's Falls,waterfall,Nuwara Eliya,Central,20,moderate,,,,false,,,December-March,
-Sera Ella,Sera Ella,waterfall,Matale,Central,10,easy,,,,false,,,May-September,
-Galboda Falls,Galboda Ella,waterfall,Kegalle,Sabaragamuwa,30,moderate,,,,false,,,May-September,
-Unawatuna,Unawatuna,beach,Galle,Southern,,,,,,false,,,November-April,
-Mirissa,Mirissa,beach,Matara,Southern,,,,,,false,,,November-April,
-Arugam Bay,Arugam Bay,beach,Ampara,Eastern,,,,,,false,,,May-September,
-Nilaveli,Nilaveli,beach,Trincomalee,Eastern,,,,,,false,,,May-September,
-Uppuveli,Uppuveli,beach,Trincomalee,Eastern,,,,,,false,,,May-September,
-Hikkaduwa,Hikkaduwa,beach,Galle,Southern,,,,,,false,,,November-April,
-Bentota,Bentota,beach,Galle,Southern,,,,,,false,,,November-April,
-Negombo,Negombo,beach,Gampaha,Western,,,,,,false,,,November-April,
-Tangalle,Tangalle,beach,Hambantota,Southern,,,,,,false,,,November-April,
-Kalpitiya,Kalpitiya,beach,Puttalam,North Western,,,,,,false,,,December-April,
-Weligama,Weligama,beach,Matara,Southern,,,,,,false,,,November-April,
-Kalkudah,Kalkudah,beach,Batticaloa,Eastern,,,,,,false,,,May-September,
-Beruwala,Beruwala,beach,Kalutara,Western,,,,,,false,,,November-April,
-Ahungalla,Ahungalla,beach,Galle,Southern,,,,,,false,,,November-April,
-Sigiriya,Sigiriya,heritage,Matale,Central,,,,,Anuradhapura period,true,,,January-April,
-Temple of the Tooth,Temple of the Tooth,heritage,Kandy,Central,,,,,Kandyan period,true,Shoulders and knees covered; shoes removed,,December-April,
-Anuradhapura,Sacred City of Anuradhapura,heritage,Anuradhapura,North Central,,,,,Anuradhapura period,true,Shoulders and knees covered; shoes removed at shrines,,May-September,
-Polonnaruwa,Ancient City of Polonnaruwa,heritage,Polonnaruwa,North Central,,,,,Polonnaruwa period,true,Shoulders and knees covered; shoes removed at shrines,,May-September,
-Dambulla cave temple,Dambulla Cave Temple,heritage,Matale,Central,,,,,Anuradhapura period,true,Shoulders and knees covered; shoes removed,,January-April,
-Galle Fort,Galle Fort,heritage,Galle,Southern,,,,,Colonial period,true,,,November-April,
-Mihintale,Mihintale,heritage,Anuradhapura,North Central,,,,,Anuradhapura period,false,Shoulders and knees covered; shoes removed,,May-September,
-Ruwanwelisaya,Ruwanwelisaya,heritage,Anuradhapura,North Central,,,,,Anuradhapura period,false,White clothing customary; shoes removed,,May-September,
-Jetavanaramaya,Jetavanaramaya,heritage,Anuradhapura,North Central,,,,,Anuradhapura period,false,Shoulders and knees covered; shoes removed,,May-September,
-Kelaniya Raja Maha Vihara,Kelaniya Raja Maha Vihara,heritage,Gampaha,Western,,,,,Kotte period,false,Shoulders and knees covered; shoes removed,,December-April,
-Gangaramaya Temple,Gangaramaya Temple,heritage,Colombo,Western,,,,,Modern period,false,Shoulders and knees covered; shoes removed,,December-April,
-Yapahuwa,Yapahuwa,heritage,Kurunegala,North Western,,,,,Yapahuwa period,false,Shoulders and knees covered; shoes removed,,May-September,
-Nalanda Gedige,Nalanda Gedige,heritage,Matale,Central,,,,,Polonnaruwa period,false,Shoulders and knees covered; shoes removed,,January-April,
-Isurumuniya,Isurumuniya,heritage,Anuradhapura,North Central,,,,,Anuradhapura period,false,Shoulders and knees covered; shoes removed,,May-September,
+wiki_title,name,category,district,province,height_m,trekking_difficulty,era,unesco_status,dress_code,best_season
+Bambarakanda Falls,Bambarakanda Falls,waterfall,Badulla,Uva,263,moderate,,false,,December-March
+Diyaluma Falls,Diyaluma Falls,waterfall,Badulla,Uva,220,hard,,false,,May-September
+Kurundu Oya Falls,Kurundu Oya Falls,waterfall,Nuwara Eliya,Central,206,hard,,false,,December-March
+Laxapana Falls,Laxapana Falls,waterfall,Nuwara Eliya,Central,126,moderate,,false,,May-September
+Ramboda Falls,Ramboda Falls,waterfall,Nuwara Eliya,Central,109,easy,,false,,May-September
+Aberdeen Falls,Aberdeen Falls,waterfall,Nuwara Eliya,Central,98,moderate,,false,,May-September
+Devon Falls,Devon Falls,waterfall,Nuwara Eliya,Central,97,easy,,false,,May-September
+St. Clair's Falls,St. Clair's Falls,waterfall,Nuwara Eliya,Central,80,easy,,false,,May-September
+Dunhinda Falls,Dunhinda Falls,waterfall,Badulla,Uva,64,moderate,,false,,December-March
+Bopath Ella,Bopath Ella,waterfall,Ratnapura,Sabaragamuwa,30,easy,,false,,May-September
+Ravana Falls,Ravana Falls,waterfall,Badulla,Uva,25,easy,,false,,December-March
+Baker's Falls,Baker's Falls,waterfall,Nuwara Eliya,Central,20,moderate,,false,,December-March
+Sera Ella,Sera Ella,waterfall,Matale,Central,10,easy,,false,,May-September
+Galboda Falls,Galboda Ella,waterfall,Kegalle,Sabaragamuwa,30,moderate,,false,,May-September
+Unawatuna,Unawatuna,beach,Galle,Southern,,,,false,,November-April
+Mirissa,Mirissa,beach,Matara,Southern,,,,false,,November-April
+Arugam Bay,Arugam Bay,beach,Ampara,Eastern,,,,false,,May-September
+Nilaveli,Nilaveli,beach,Trincomalee,Eastern,,,,false,,May-September
+Uppuveli,Uppuveli,beach,Trincomalee,Eastern,,,,false,,May-September
+Hikkaduwa,Hikkaduwa,beach,Galle,Southern,,,,false,,November-April
+Bentota,Bentota,beach,Galle,Southern,,,,false,,November-April
+Negombo,Negombo,beach,Gampaha,Western,,,,false,,November-April
+Tangalle,Tangalle,beach,Hambantota,Southern,,,,false,,November-April
+Kalpitiya,Kalpitiya,beach,Puttalam,North Western,,,,false,,December-April
+Weligama,Weligama,beach,Matara,Southern,,,,false,,November-April
+Kalkudah,Kalkudah,beach,Batticaloa,Eastern,,,,false,,May-September
+Beruwala,Beruwala,beach,Kalutara,Western,,,,false,,November-April
+Ahungalla,Ahungalla,beach,Galle,Southern,,,,false,,November-April
+Sigiriya,Sigiriya,heritage,Matale,Central,,,Anuradhapura period,true,,January-April
+Temple of the Tooth,Temple of the Tooth,heritage,Kandy,Central,,,Kandyan period,true,Shoulders and knees covered; shoes removed,December-April
+Anuradhapura,Sacred City of Anuradhapura,heritage,Anuradhapura,North Central,,,Anuradhapura period,true,Shoulders and knees covered; shoes removed at shrines,May-September
+Polonnaruwa,Ancient City of Polonnaruwa,heritage,Polonnaruwa,North Central,,,Polonnaruwa period,true,Shoulders and knees covered; shoes removed at shrines,May-September
+Dambulla cave temple,Dambulla Cave Temple,heritage,Matale,Central,,,Anuradhapura period,true,Shoulders and knees covered; shoes removed,January-April
+Galle Fort,Galle Fort,heritage,Galle,Southern,,,Colonial period,true,,November-April
+Mihintale,Mihintale,heritage,Anuradhapura,North Central,,,Anuradhapura period,false,Shoulders and knees covered; shoes removed,May-September
+Ruwanwelisaya,Ruwanwelisaya,heritage,Anuradhapura,North Central,,,Anuradhapura period,false,White clothing customary; shoes removed,May-September
+Jetavanaramaya,Jetavanaramaya,heritage,Anuradhapura,North Central,,,Anuradhapura period,false,Shoulders and knees covered; shoes removed,May-September
+Kelaniya Raja Maha Vihara,Kelaniya Raja Maha Vihara,heritage,Gampaha,Western,,,Kotte period,false,Shoulders and knees covered; shoes removed,December-April
+Gangaramaya Temple,Gangaramaya Temple,heritage,Colombo,Western,,,Modern period,false,Shoulders and knees covered; shoes removed,December-April
+Yapahuwa,Yapahuwa,heritage,Kurunegala,North Western,,,Yapahuwa period,false,Shoulders and knees covered; shoes removed,May-September
+Nalanda Gedige,Nalanda Gedige,heritage,Matale,Central,,,Polonnaruwa period,false,Shoulders and knees covered; shoes removed,January-April
+Isurumuniya,Isurumuniya,heritage,Anuradhapura,North Central,,,Anuradhapura period,false,Shoulders and knees covered; shoes removed,May-September

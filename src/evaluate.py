@@ -11,15 +11,23 @@ import csv
 import sys
 import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import psycopg
 from PIL import Image
 
 import config
+import generate
 import pipeline
 import retrieval
 
 RESULTS_DIR = config.ROOT / "report" / "results"
+
+# Router and ablation questions are independent of each other, so they run
+# concurrently. Measured empirically: 4 concurrent workers was slower than 1
+# (free-tier rate limiting silently eats the parallelism gain in retry
+# backoff), 2 was the fastest of the three tried.
+EVAL_CONCURRENCY = 2
 
 
 def load_questions() -> list[dict]:
@@ -64,31 +72,41 @@ def mean_of_scored(rows: list[dict], key: str) -> float:
     return sum(scored) / len(scored) if scored else 0.0
 
 
+def _classify(q: dict) -> str:
+    return retrieval.route(q["question"], has_image=False)["query_type"]
+
+
 def eval_router(questions: list[dict]) -> list[dict]:
     print("\n[1] Router accuracy")
     rows, correct = [], 0
     confusion = defaultdict(int)
 
-    for q in questions:
-        plan = retrieval.route(q["question"], has_image=False)
-        predicted = plan["query_type"]
-        ok = predicted == q["expected_type"]
-        correct += ok
-        confusion[(q["expected_type"], predicted)] += 1
-        rows.append(
-            {
+    # as_completed rather than pool.map(), so each result prints as soon as
+    # it lands instead of only after every question has finished -- with 36
+    # concurrent questions a run without this looks identical to a hang.
+    with ThreadPoolExecutor(max_workers=EVAL_CONCURRENCY) as pool:
+        future_to_q = {pool.submit(_classify, q): q for q in questions}
+        by_id = {}
+        for future in as_completed(future_to_q):
+            q = future_to_q[future]
+            predicted = future.result()
+            ok = predicted == q["expected_type"]
+            correct += ok
+            confusion[(q["expected_type"], predicted)] += 1
+            row = {
                 "id": q["id"],
                 "question": q["question"],
                 "expected": q["expected_type"],
                 "predicted": predicted,
                 "correct": int(ok),
             }
-        )
-        print(
-            f"  {q['id']}  {q['expected_type']:>10} -> {predicted:<10} "
-            f"{'ok' if ok else 'MISS'}"
-        )
+            by_id[q["id"]] = row
+            print(
+                f"  {q['id']}  {q['expected_type']:>10} -> {predicted:<10} "
+                f"{'ok' if ok else 'MISS'}"
+            )
 
+    rows = [by_id[q["id"]] for q in questions]
     print(f"  accuracy: {correct}/{len(questions)} = {correct / len(questions):.1%}")
     write_csv("router_results.csv", rows)
     write_csv(
@@ -120,7 +138,6 @@ def eval_text_retrieval(questions: list[dict], ids: dict[str, int]) -> list[dict
         }
         hits = retrieval.retrieve_text(plan, k=5)
 
-        # Rank by attraction, so several chunks of one place count once.
         ranked, seen = [], set()
         for h in hits:
             if h["attraction_id"] not in seen:
@@ -213,59 +230,80 @@ def eval_image_retrieval() -> list[dict]:
     return rows
 
 
+MODES = ["structured", "semantic", "hybrid"]
+
+
+def _ablate_one(q: dict, expected_ids: set[int]) -> dict:
+    """Score one question under each retrieval strategy. Runs in a worker thread."""
+    row = {
+        "id": q["id"],
+        "question": q["question"],
+        "expected_type": q["expected_type"],
+    }
+    for mode in MODES:
+        # An API failure is not a retrieval failure. Unresolved ones are
+        # excluded from the averages rather than counted as misses.
+        res, api_failed = None, False
+        for attempt in range(3):
+            try:
+                # skip_generation: the ablation only checks which attractions
+                # reached the context, so writing out the final answer is
+                # pure waste -- roughly half of ablation's LLM calls, unread.
+                res = pipeline.answer(
+                    q["question"], force_type=mode, skip_generation=True
+                )
+            except Exception as exc:  # noqa: BLE001
+                print(f"  {q['id']} [{mode}] call failed: {str(exc)[:60]}")
+                time.sleep(2 * (attempt + 1))
+                continue
+            if res["sql"] and res["sql"].get("api_error"):
+                time.sleep(2 * (attempt + 1))
+                api_failed = True
+                continue
+            api_failed = False
+            break
+
+        if res is None or api_failed:
+            print(f"  {q['id']} [{mode}] unresolved API error -- excluded")
+            row[mode] = ""
+            continue
+
+        in_context = set(res["attraction_ids"])
+        if res["sql"] and res["sql"].get("rows"):
+            in_context |= {r["id"] for r in res["sql"]["rows"] if "id" in r}
+        row[mode] = int(bool(in_context & expected_ids))
+
+    return row
+
+
 def eval_ablation(questions: list[dict], ids: dict[str, int]) -> list[dict]:
     """How often the expected attraction reaches the model, per strategy."""
     print("\n[4] Ablation: SQL-only vs semantic-only vs hybrid")
-    modes = ["structured", "semantic", "hybrid"]
-    rows = []
 
+    scorable = []
     for q in questions:
         expected_ids = {ids[n] for n in q["expected"] if n in ids}
-        if not expected_ids:
-            continue
+        if expected_ids:
+            scorable.append((q, expected_ids))
 
-        row = {
-            "id": q["id"],
-            "question": q["question"],
-            "expected_type": q["expected_type"],
+    with ThreadPoolExecutor(max_workers=EVAL_CONCURRENCY) as pool:
+        future_to_q = {
+            pool.submit(_ablate_one, q, expected_ids): q for q, expected_ids in scorable
         }
-        for mode in modes:
-            # An API failure is not a retrieval failure. Unresolved ones are
-            # excluded from the averages rather than counted as misses.
-            res, api_failed = None, False
-            for attempt in range(3):
-                try:
-                    res = pipeline.answer(q["question"], force_type=mode)
-                except Exception as exc:  # noqa: BLE001
-                    print(f"  {q['id']} [{mode}] call failed: {str(exc)[:60]}")
-                    time.sleep(2 * (attempt + 1))
-                    continue
-                if res["sql"] and res["sql"].get("api_error"):
-                    time.sleep(2 * (attempt + 1))
-                    api_failed = True
-                    continue
-                api_failed = False
-                break
+        by_id = {}
+        for future in as_completed(future_to_q):
+            row = future.result()
+            by_id[row["id"]] = row
+            print(
+                f"  {row['id']}  sql={row['structured']}  semantic={row['semantic']}  "
+                f"hybrid={row['hybrid']}"
+            )
 
-            if res is None or api_failed:
-                print(f"  {q['id']} [{mode}] unresolved API error -- excluded")
-                row[mode] = ""
-                continue
-
-            in_context = set(res["attraction_ids"])
-            if res["sql"] and res["sql"].get("rows"):
-                in_context |= {r["id"] for r in res["sql"]["rows"] if "id" in r}
-            row[mode] = int(bool(in_context & expected_ids))
-
-        rows.append(row)
-        print(
-            f"  {q['id']}  sql={row['structured']}  semantic={row['semantic']}  "
-            f"hybrid={row['hybrid']}"
-        )
+    rows = [by_id[q["id"]] for q, _ in scorable]
 
     if rows:
         print("\n  context recall:")
-        for mode in modes:
+        for mode in MODES:
             scored = [r[mode] for r in rows if r[mode] != ""]
             if scored:
                 print(
@@ -281,6 +319,12 @@ def main() -> None:
     if not ids:
         print("The attractions table is empty -- run src/ingest.py first.")
         return
+
+    # Force these before the thread pools start, so lazy singleton init
+    # (the Gemini client, the SQL column-vocabulary cache) doesn't race
+    # across the first few concurrent requests.
+    generate.client()
+    retrieval.column_vocabulary()
 
     print(
         f"Evaluation set: {len(questions)} questions;  database: {len(ids)} attractions"
