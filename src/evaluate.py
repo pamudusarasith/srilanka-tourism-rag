@@ -24,9 +24,7 @@ import retrieval
 RESULTS_DIR = config.ROOT / "report" / "results"
 
 # Router and ablation questions are independent of each other, so they run
-# concurrently. Measured empirically: 4 concurrent workers was slower than 1
-# (free-tier rate limiting silently eats the parallelism gain in retry
-# backoff), 2 was the fastest of the three tried.
+# concurrently.
 EVAL_CONCURRENCY = 2
 
 
@@ -82,7 +80,7 @@ def eval_router(questions: list[dict]) -> list[dict]:
     confusion = defaultdict(int)
 
     # as_completed rather than pool.map(), so each result prints as soon as
-    # it lands instead of only after every question has finished -- with 36
+    # it lands instead of only after every question has finished with 36
     # concurrent questions a run without this looks identical to a hang.
     with ThreadPoolExecutor(max_workers=EVAL_CONCURRENCY) as pool:
         future_to_q = {pool.submit(_classify, q): q for q in questions}
@@ -187,7 +185,7 @@ def eval_image_retrieval() -> list[dict]:
         held_out = cur.fetchall()
 
     if not held_out:
-        print("  no held-out images found -- run ingest.py then embed.py first")
+        print("  no held-out images found - run ingest.py then embed.py first")
         return []
 
     rows = []
@@ -248,7 +246,7 @@ def _ablate_one(q: dict, expected_ids: set[int]) -> dict:
             try:
                 # skip_generation: the ablation only checks which attractions
                 # reached the context, so writing out the final answer is
-                # pure waste -- roughly half of ablation's LLM calls, unread.
+                # pure waste - roughly half of ablation's LLM calls, unread.
                 res = pipeline.answer(
                     q["question"], force_type=mode, skip_generation=True
                 )
@@ -264,7 +262,7 @@ def _ablate_one(q: dict, expected_ids: set[int]) -> dict:
             break
 
         if res is None or api_failed:
-            print(f"  {q['id']} [{mode}] unresolved API error -- excluded")
+            print(f"  {q['id']} [{mode}] unresolved API error - excluded")
             row[mode] = ""
             continue
 
@@ -317,7 +315,7 @@ def main() -> None:
     questions = load_questions()
     ids = name_to_id()
     if not ids:
-        print("The attractions table is empty -- run src/ingest.py first.")
+        print("The attractions table is empty - run src/ingest.py first.")
         return
 
     # Force these before the thread pools start, so lazy singleton init

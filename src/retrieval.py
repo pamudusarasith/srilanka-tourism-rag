@@ -6,9 +6,10 @@ import re
 import chromadb
 import psycopg
 from PIL import Image
-from sentence_transformers import SentenceTransformer
 
-import config
+import config  # must come before the sentence_transformers import below
+
+from sentence_transformers import SentenceTransformer  # noqa: E402
 
 STRUCTURED = "structured"
 SEMANTIC = "semantic"

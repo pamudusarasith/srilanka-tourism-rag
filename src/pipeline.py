@@ -123,7 +123,7 @@ def integrate(
         rows = retrieval.fetch_attractions(ordered_ids[: config.MAX_SQL_ROWS])
         if rows:
             sql_result = {
-                "sql": "-- looked up from vector-search hits, not a generated query",
+                "sql": "- looked up from vector-search hits, not a generated query",
                 "rows": rows,
                 "error": None,
             }

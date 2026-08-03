@@ -26,6 +26,24 @@ IMAGE_COLLECTION = "images"
 TEXT_MODEL = "BAAI/bge-base-en-v1.5"
 IMAGE_MODEL = "clip-ViT-B-16"
 
+
+def _model_is_cached(model_name: str) -> bool:
+    """Check the local HF cache without needing to know how sentence-
+    transformers resolves a short alias like 'clip-ViT-B-16' to a full repo id."""
+    cache = Path.home() / ".cache" / "huggingface" / "hub"
+    if not cache.is_dir():
+        return False
+    needle = model_name.rsplit("/", 1)[-1].lower()
+    return any(needle in p.name.lower() for p in cache.iterdir())
+
+
+if (
+    "HF_HUB_OFFLINE" not in os.environ
+    and _model_is_cached(TEXT_MODEL)
+    and _model_is_cached(IMAGE_MODEL)
+):
+    os.environ["HF_HUB_OFFLINE"] = "1"
+
 CHUNK_WORDS = 220
 CHUNK_OVERLAP_WORDS = 50
 

@@ -9,9 +9,10 @@ import sys
 import chromadb
 import psycopg
 from PIL import Image
-from sentence_transformers import SentenceTransformer
 
-import config
+import config  # must come before the sentence_transformers import below
+
+from sentence_transformers import SentenceTransformer  # noqa: E402
 
 
 def get_client() -> chromadb.ClientAPI:
@@ -41,7 +42,7 @@ def embed_text(conn, client) -> int:
         rows = cur.fetchall()
 
     if not rows:
-        print("  no documents found -- run src/ingest.py first")
+        print("  no documents found - run src/ingest.py first")
         return 0, 0
 
     ids = [f"doc_{r[0]}" for r in rows]
@@ -80,13 +81,13 @@ def embed_images(conn, client) -> int:
                    a.name, a.category, a.district
             FROM images i
             JOIN attractions a ON a.id = i.attraction_id
-            WHERE i.is_held_out = FALSE      -- the eval set
+            WHERE i.is_held_out = FALSE      - the eval set
             ORDER BY i.id
             """)
         rows = cur.fetchall()
 
     if not rows:
-        print("  no images found -- run src/ingest.py first")
+        print("  no images found - run src/ingest.py first")
         return 0, 0
 
     ids, metas, pil_images, captions = [], [], [], []

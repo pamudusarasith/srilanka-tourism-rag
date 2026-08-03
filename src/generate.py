@@ -135,7 +135,7 @@ def build_context(
     if image_hits:
         parts.append("## Photographs retrieved (shown to you as images below)\n")
         for i, hit in enumerate(image_hits, start=1):
-            parts.append(f"[IMG{i}] {hit['name']} -- {hit['caption']}")
+            parts.append(f"[IMG{i}] {hit['name']} - {hit['caption']}")
         parts.append("")
 
     if not parts:

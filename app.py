@@ -18,8 +18,22 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 import config  # noqa: E402
 import pipeline  # noqa: E402
+import retrieval  # noqa: E402
 
 st.set_page_config(page_title="Sri Lanka Tourism RAG", page_icon="🇱🇰", layout="wide")
+
+
+@st.cache_resource(show_spinner="Loading embedding models…")
+def _warm_up_models() -> bool:
+    """
+    Load both encoders once when the server starts.
+    """
+    retrieval.text_model()
+    retrieval.image_model()
+    return True
+
+
+_warm_up_models()
 
 EXAMPLES = {
     "Structured": "Which waterfalls are more than 100 metres tall?",

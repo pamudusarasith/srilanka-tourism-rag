@@ -169,13 +169,13 @@ def main() -> None:
         try:
             wiki = sources.fetch_wikipedia(row["wiki_title"])
         except Exception as exc:  # noqa: BLE001
-            print(f"      ! Wikipedia fetch failed ({str(exc)[:70]}) -- skipped")
+            print(f"      ! Wikipedia fetch failed ({str(exc)[:70]}) - skipped")
             conn.rollback()
             failures.append(name)
             continue
 
         if wiki is None:
-            print("      ! no Wikipedia page found -- skipped")
+            print("      ! no Wikipedia page found - skipped")
             failures.append(name)
             continue
 
@@ -222,7 +222,7 @@ def main() -> None:
             n_doc += chunk_i
             n_img += saved
         except Exception as exc:  # noqa: BLE001
-            print(f"      ! failed ({str(exc)[:70]}) -- rolled back")
+            print(f"      ! failed ({str(exc)[:70]}) - rolled back")
             conn.rollback()
             failures.append(name)
 
